@@ -1,6 +1,7 @@
 param([switch]$SkipInstall)
 
 $ErrorActionPreference = 'Stop'
+$ProgressPreference = 'SilentlyContinue'
 Set-Location -LiteralPath $PSScriptRoot
 $buildPython = Join-Path $PSScriptRoot '.venv-build\Scripts\python.exe'
 if (-not (Test-Path -LiteralPath $buildPython)) {
