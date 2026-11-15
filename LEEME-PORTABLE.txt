@@ -1,0 +1,13 @@
+OPTYNAN PARA WINDOWS x64
+
+1. Extrae TODO el ZIP en una carpeta de tu equipo.
+2. Abre OptyNan.exe dentro de la carpeta OptyNan.
+3. Conserva la carpeta _internal junto al ejecutable: contiene sus dependencias.
+
+No necesitas instalar Python. No ejecutes el programa dentro del ZIP.
+Para las herramientas que requieren permisos elevados, cierra la aplicación
+y abre OptyNan.exe con clic derecho > Ejecutar como administrador.
+
+Para distribuirlo, comparte OptyNan-Windows-x64.zip completo, no el EXE solo.
+Los registros y preferencias se guardan en %LOCALAPPDATA%\OptyNan.
+Esta distribución no tiene firma digital de editor.

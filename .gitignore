@@ -1,0 +1,21 @@
+# Entornos y archivos generados
+.venv*/
+__pycache__/
+*.py[cod]
+build/
+dist/
+*.spec
+*.zip
+
+# Respaldos, exportaciones y datos locales
+*.bak
+OptyNan-*.txt
+*.log
+*.log.*
+energy-plan.json
+settings.json
+session.lock
+.env
+.env.*
+.idea/
+.vscode/
