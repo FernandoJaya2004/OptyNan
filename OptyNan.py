@@ -22,6 +22,7 @@ from tkinter import filedialog, messagebox, ttk
 import webbrowser
 
 import psutil
+from optynan_hardware import collect_hardware, hardware_sections
 from optynan_core import (
     AnalysisCancelled, SessionStore, delete_candidates, scan_files, stream_command,
 )
@@ -89,6 +90,7 @@ class OptyNan(tk.Tk):
         self.disk_cache = None
         self.chart_size = None
         self.metric_timer = None
+        self.hardware_loaded = False
         self.action_buttons = []
         self.history = deque(maxlen=601)
         self.system_drive = Path(os.environ.get("SystemRoot", "C:/Windows")).anchor
@@ -189,7 +191,26 @@ class OptyNan(tk.Tk):
         self.chart = tk.Canvas(charts, bg=CARD, height=140, highlightthickness=0)
         self.chart.pack(fill="both", expand=True)
         self.chart.bind("<Configure>", lambda _event: self.draw_history())
-        notebook.bind("<<NotebookTabChanged>>", lambda _event: self.draw_history() if self.chart.winfo_ismapped() else None)
+        self.hardware_tab = self.tab(notebook, "Mi equipo")
+        hardware_header = tk.Frame(self.hardware_tab, bg=CARD)
+        hardware_header.pack(fill="x", pady=(0, 6))
+        self.hardware_status = self.label(hardware_header, "Consulta los componentes de tu computadora.", 9, MUTED)
+        self.hardware_status.pack(side="left")
+        self.button(hardware_header, "Actualizar componentes", self.refresh_hardware).pack(side="right")
+        hardware_body = tk.Frame(self.hardware_tab, bg=CARD)
+        hardware_body.pack(fill="both", expand=True)
+        self.hardware_tree = ttk.Treeview(hardware_body, columns=("value",), height=7)
+        self.hardware_tree.heading("#0", text="Componente / característica")
+        self.hardware_tree.heading("value", text="Información del equipo")
+        self.hardware_tree.column("#0", width=280, minwidth=170)
+        self.hardware_tree.column("value", width=540, minwidth=330)
+        hardware_scroll = ttk.Scrollbar(hardware_body, command=self.hardware_tree.yview)
+        hardware_scroll.pack(side="right", fill="y")
+        hardware_horizontal = ttk.Scrollbar(hardware_body, orient="horizontal", command=self.hardware_tree.xview)
+        hardware_horizontal.pack(side="bottom", fill="x")
+        self.hardware_tree.configure(yscrollcommand=hardware_scroll.set, xscrollcommand=hardware_horizontal.set)
+        self.hardware_tree.pack(fill="both", expand=True)
+        notebook.bind("<<NotebookTabChanged>>", self.tab_changed)
         items = [
             (cleaning, "Caché de Chrome y Edge", self.clean_browser),
             (cleaning, "Vaciar papelera", self.empty_recycle_bin),
@@ -303,6 +324,10 @@ class OptyNan(tk.Tk):
                 self.previous_plan = value
             elif event == "preview":
                 self.after_idle(lambda rows=value: self.show_preview(rows))
+            elif event == "hardware":
+                self.show_hardware(value)
+            elif event == "hardware_error":
+                self.hardware_status.configure(text="No se pudo consultar. Pulsa Actualizar componentes para reintentar.")
             elif event == "done":
                 self.busy = False
                 self.disk_checked_at = 0
@@ -315,6 +340,39 @@ class OptyNan(tk.Tk):
 
     def command(self, title, args, admin=False, timeout=180, confirm=None):
         self.start(title, lambda: stream_command(args, lambda text: self.events.put(("log", text)), timeout), admin, confirm)
+
+    def tab_changed(self, _event=None):
+        selected = self.notebook.select()
+        if selected == str(self.charts_tab) and self.chart.winfo_ismapped():
+            self.draw_history()
+        elif selected == str(self.hardware_tab) and not self.hardware_loaded:
+            self.refresh_hardware()
+
+    def refresh_hardware(self):
+        if self.busy:
+            self.hardware_status.configure(text="Espera a que termine la tarea y pulsa Actualizar componentes.")
+            return
+        self.hardware_status.configure(text="Consultando componentes… puede tardar unos segundos.")
+
+        def operation():
+            try:
+                sections = hardware_sections(collect_hardware())
+                self.events.put(("hardware", sections))
+                return "Inventario actualizado en la pestaña Mi equipo."
+            except Exception:
+                self.events.put(("hardware_error", None))
+                raise
+
+        self.start("Consultar componentes del equipo", operation)
+
+    def show_hardware(self, sections):
+        self.hardware_tree.delete(*self.hardware_tree.get_children())
+        for title, pairs in sections:
+            parent = self.hardware_tree.insert("", "end", text=title, open=True)
+            for label, content in pairs:
+                self.hardware_tree.insert(parent, "end", text=label, values=(content,))
+        self.hardware_loaded = True
+        self.hardware_status.configure(text=f"Actualizado a las {datetime.now():%H:%M:%S} · Datos informados por Windows/firmware.")
 
     def show_history(self):
         dialog = tk.Toplevel(self)

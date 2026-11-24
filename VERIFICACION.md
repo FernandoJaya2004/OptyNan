@@ -1,5 +1,17 @@
 # Verificación de las mejoras
 
+## Inventario de hardware · 23 de noviembre de 2026
+
+29 pruebas automatizadas aprobadas, incluidas 7 del inventario: distinción de los
+códigos SMBIOS/CIM, varias gráficas y pantallas, datos incompletos, estructuras
+Win32, salida JSON, timeout y actualización de la pestaña sin repetir consultas.
+
+Se verificó una consulta real de solo lectura fuera del entorno restringido:
+procesador, dos módulos DDR4, dos gráficas, una pantalla activa de 1920 × 1080
+a 144 Hz, placa base, BIOS, disco y audio. No se ejecutaron acciones de mantenimiento.
+Los resultados concretos pueden variar según el firmware, los controladores y
+los permisos del equipo donde se ejecute.
+
 Fecha: 15 de noviembre de 2026.
 
 ## Pruebas

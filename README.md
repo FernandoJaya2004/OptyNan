@@ -17,7 +17,7 @@ python -m pip install -r requirements.txt
 python OptyNan.py
 ```
 
-Conserva `OptyNan.py` y `optynan_core.py` en la misma carpeta. La aplicación abre
+Conserva `OptyNan.py`, `optynan_core.py` y `optynan_hardware.py` en la misma carpeta. La aplicación abre
 sin elevar permisos. Para SFC, DISM, optimización del disco y restablecimiento de
 red, ejecútala desde una terminal abierta como administrador.
 
@@ -64,6 +64,37 @@ ni Windows Search. No todos los equipos ofrecen el plan de alto rendimiento.
 
 Solo se permite una instancia por carpeta de datos, evitando conflictos en el
 estado de energía y en los registros.
+
+## Mi equipo: componentes de la computadora
+
+La pestaña **Mi equipo** consulta los componentes al abrirla por primera vez.
+**Actualizar componentes** permite repetir la consulta después de conectar una
+pantalla o cambiar hardware. Se ejecuta en segundo plano y conserva el resultado
+en memoria, sin volver a consultar en cada muestra del monitoreo.
+
+- Equipo y Windows: fabricante, modelo, versión, compilación y arquitectura.
+- Procesadores: modelo, núcleos físicos, procesadores lógicos y frecuencia máxima informada.
+- RAM: capacidad instalada y módulos, ubicación, DDR/LPDDR, fabricante, referencia,
+  formato DIMM/SO-DIMM y velocidades nominal/configurada informadas por el firmware.
+- Gráficas: todas las detectadas por Windows, modelo, procesador gráfico y controlador.
+- Pantallas activas: resolución actual en píxeles físicos, frecuencia y pantalla principal.
+- Almacenamiento: modelo, capacidad, SSD/HDD e interfaz, cuando están disponibles.
+- Placa base, versión de BIOS y dispositivos de audio.
+
+Los campos ausentes se muestran como **No disponible**. El tipo DDR se obtiene del
+código SMBIOS, sin adivinarlo por velocidad. La RAM instalada y la disponible para
+Windows pueden diferir por reservas de hardware. Las pantallas reflejan modos
+activos de Windows, no la resolución máxima del monitor; una conexión remota o
+pantallas duplicadas pueden aparecer como dispositivos lógicos.
+
+No se utiliza `Win32_VideoController.AdapterRAM` para afirmar la VRAM dedicada:
+su campo de 32 bits no permite representar con fiabilidad tarjetas de gran capacidad.
+El inventario no consulta números de serie, claves de producto, direcciones MAC
+ni IP, y no se adjunta automáticamente al registro ni se envía a Internet.
+
+Fuentes técnicas: [memoria física de Windows](https://learn.microsoft.com/en-us/windows/win32/cimwin32prov/win32-physicalmemory),
+[tipos de memoria SMBIOS](https://www.dmtf.org/sites/default/files/standards/documents/DSP0134_3.8.0.pdf)
+y [modos de pantalla](https://learn.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-enumdisplaysettingsw).
 
 ## Monitoreo y gráficas
 
@@ -136,6 +167,7 @@ Los respaldos, entornos virtuales y registros personales se excluyen de Git.
 - `OptyNan.py`: interfaz, coordinación de tareas y herramientas de Windows.
 - `optynan_core.py`: análisis, eliminación de candidatos, persistencia y comandos
   con salida progresiva; se puede probar sin abrir la interfaz.
+- `optynan_hardware.py`: consultas de componentes y pantallas, y formato del inventario.
 - `test_optynan.py`: pruebas aisladas con datos temporales y comandos simulados.
 - `benchmark_optynan.py`: medición breve de arranque y reposo, sin mantenimiento.
 

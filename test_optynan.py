@@ -1,6 +1,7 @@
 """Pruebas aisladas: no ejecutan mantenimiento del equipo."""
 
 import os
+import gc
 from pathlib import Path
 import subprocess
 import tempfile
@@ -19,6 +20,7 @@ class MaintenanceTests(unittest.TestCase):
         self.state_dir = tempfile.TemporaryDirectory()
 
     def tearDown(self):
+        gc.collect()
         self.state_dir.cleanup()
 
     def test_preview_preserves_files_and_matches_cleanup_rules(self):
